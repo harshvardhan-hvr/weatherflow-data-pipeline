@@ -1,0 +1,41 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Environment variables & secrets
+.env
+
+# Data files (keep raw & generated artifacts out of git except sample)
+data/raw/*.csv
+data/raw/*.json
+data/processed/*.parquet
+data/processed/*.csv
+data/gold/*.csv
+data/*.db
+*.sqlite
+*.sqlite3
+
+# Reports
+reports/*.md
+
+# Test caches & coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
