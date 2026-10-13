@@ -1,0 +1,68 @@
+name: WeatherFlow CI/CD & Scheduled ETL Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Runs daily at 06:00 AM UTC (simulating daily automated batch run)
+    - cron: '0 6 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI anytime
+
+jobs:
+  build-test-and-run:
+    runs-on: ubuntu-latest
+
+    services:
+      # Ephemeral live PostgreSQL instance for pipeline validation
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: weather_user
+          POSTGRES_PASSWORD: weather_password
+          POSTGRES_DB: weatherflow
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Pytest Test Suite
+        env:
+          DATABASE_URL: postgresql://weather_user:weather_password@localhost:5432/weatherflow
+        run: |
+          python -m pytest tests/ -v
+
+      - name: Execute WeatherFlow ETL Pipeline
+        env:
+          DATABASE_URL: postgresql://weather_user:weather_password@localhost:5432/weatherflow
+          NOAA_TOKEN: ${{ secrets.NOAA_TOKEN }}
+        run: |
+          python -m src.pipeline
+
+      - name: Upload Gold Analytical Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: weatherflow-gold-data
+          path: |
+            data/gold/*.csv
+            reports/*.md
+          retention-days: 7

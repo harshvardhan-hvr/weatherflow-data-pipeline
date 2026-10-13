@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Service 1: PostgreSQL Relational Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: weatherflow-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: weatherflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d weatherflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Service 2: WeatherFlow ETL Execution Service
+  pipeline:
+    build: .
+    container_name: weatherflow-pipeline
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgrespassword@postgres:5432/weatherflow
+      - NOAA_TOKEN=${NOAA_TOKEN}
+    volumes:
+      - ./data/gold:/app/data/gold
+      - ./data/processed:/app/data/processed
+      - ./reports:/app/reports
+    command: ["python", "-m", "src.pipeline"]
+
+volumes:
+  postgres_data:
