@@ -5,8 +5,6 @@
 [![Testing](https://img.shields.io/badge/pytest-24%20passed-brightgreen.svg)](https://docs.pytest.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-An end-to-end, production-grade Data Engineering project designed for **Graduate Data Engineers** and **Entry-Level Data Engineers**. It demonstrates **Python ETL**, **automated data quality validation**, **dimensional modeling in SQL**, **idempotent database ingestion**, **Apache Parquet storage**, and **Power BI-ready analytics**.
-
 ---
 
 ## Table of Contents
